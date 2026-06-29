@@ -105,16 +105,7 @@ const data = reactive({
   pageSize: 5,
   total: 0,
   dialogFormVisible: false,
-  form: {
-    id: null,
-    name: null,
-    price: null,
-    category: null,
-    time: null,
-    isbn: null,
-    author: null,
-    press: null
-  }
+  form: {}
 })
 
 const load = () =>{
