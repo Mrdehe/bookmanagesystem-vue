@@ -14,4 +14,5 @@
 
 <script setup lang="ts">
 import router from "@/router/index.js";
+import request from "@/utils/request";
 </script>
