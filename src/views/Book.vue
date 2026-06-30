@@ -160,12 +160,13 @@ const save = () => {
 
 const add = () => {
   request.post('/book/books',data.form).then(res => {
-    if (res.data.code === '200') {
+    if (res.code === '200') {
       console.log(res)
       data.dialogFormVisible = false;
       ElMessage.success('操作成功！')
+      load()
     }else{
-      ElMessage.error(res.data.msg)
+      ElMessage.error(res.msg)
     }
   })
 }
