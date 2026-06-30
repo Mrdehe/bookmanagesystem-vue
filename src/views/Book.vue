@@ -7,12 +7,13 @@
     </el-card>
     <el-card>
       <el-button type="primary" @click="handleAdd">新增</el-button>
-      <el-button type="warning">批量删除</el-button>
+      <el-button type="warning" @click="handleDeleteBatch">批量删除</el-button>
       <el-button type="info">导入</el-button>
       <el-button type="success">导出</el-button>
     </el-card>
     <el-card>
-      <el-table :data="data.books" stripe>
+      <el-table :data="data.books" stripe @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55px"></el-table-column>
         <el-table-column label="ID" prop="id"></el-table-column>
         <el-table-column label="名称" prop="name"></el-table-column>
         <el-table-column label="价格" prop="price"></el-table-column>
@@ -24,7 +25,7 @@
           <template #default="scope" style="width: 120px">
             <el-button el-button type="primary" :icon="Edit" circle @click="handleUpdate(scope.row)"/>
 
-            <el-button el-button type="danger" :icon="Delete" circle @click="handleUpdate(scope.row)"/>
+            <el-button el-button type="danger" :icon="Delete" circle @click="handleDelete(scope.row)"/>
           </template>
         </el-table-column>
 
@@ -41,7 +42,7 @@
             layout="total, sizes, prev, pager, next, jumper"
             :total="data.total" />
       </div>
-      <el-dialog v-model="data.dialogFormVisible" title="图书信息" width="500">
+      <el-dialog v-model="data.dialogFormVisible" title="图书信息" width="500px">
         <el-form :model="data.form">
           <el-form-item label="图书名称" label-width="80px">
             <el-input v-model="data.form.name" autocomplete="off" />
@@ -95,7 +96,7 @@
 <script setup lang="ts">
 import request from "@/utils/request";
 import { reactive } from "vue";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit,} from '@element-plus/icons-vue'
 
 const data = reactive({
@@ -105,7 +106,17 @@ const data = reactive({
   pageSize: 5,
   total: 0,
   dialogFormVisible: false,
-  form: {}
+  form: {
+    id: null,
+    name: null,
+    price: null,
+    category: null,
+    time: null,
+    isbn: null,
+    author: null,
+    press: null
+  },
+  ids:[]
 })
 
 const load = () =>{
@@ -131,7 +142,16 @@ const reset = () => {
 
 const handleAdd = () => {
   data.dialogFormVisible = true
-  data.form={}//清空数据
+  Object.assign(data.form,
+      {
+        id: null,
+        name: null,
+        price: null,
+        category: null,
+        time: null,
+        isbn: null,
+        author: null,
+        press: null })//清空数据
 }
 
 const save = () => {
@@ -164,7 +184,48 @@ const update = () => {
 }
 
 const handleUpdate = (row) => {
-  data.form=JSON.parse(JSON.stringify(row))//深拷贝一个新的对象，不影响行对象
+  Object.assign(data.form, JSON.parse(JSON.stringify(row)))//深拷贝一个新的对象，不影响行对象
   data.dialogFormVisible=true;
 }
+
+const handleDelete = (row) => {
+  ElMessageBox.confirm('删除数据后无法恢复，确定删除吗？','删除确认',{type: 'warning'}).then(() => {
+    request.put('/book/books/'+row.id).then(res => {
+      if (res.data.code === '200') {
+        console.log(res)
+        data.dialogFormVisible = false;
+        ElMessage.success('操作成功！')
+        load()
+      }else{
+        ElMessage.error(res.data.msg)
+      }
+    })
+  }).catch()
+
+}
+
+const handleSelectionChange = (row) => {
+  data.ids = row.map( row => row.id )
+  console.log(data.ids)
+}
+
+const handleDeleteBatch = () => {
+  if(data.ids.length ===0){
+    ElMessage.warning('请选择数据！')
+    return;
+  }
+  ElMessageBox.confirm('删除数据后无法恢复，确定删除吗？','删除确认',{type: 'warning'}).then(() => {
+    request.delete('/book/books',{data:data.ids}).then(res => {
+      if (res.data.code === '200') {
+        console.log(res)
+        data.dialogFormVisible = false;
+        ElMessage.success('操作成功！')
+        load()
+      }else{
+        ElMessage.error(res.data.msg)
+      }
+    })
+  }).catch()
+}
+
 </script>
