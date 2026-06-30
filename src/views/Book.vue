@@ -127,7 +127,7 @@ const data = reactive({
 })
 
 const load = () =>{
-  request.get('/book/books',{
+  request.get<unknown, Result>('/book/books',{
     params: {
       name: data.name,
       pageNum: data.pageNum,
@@ -179,14 +179,14 @@ const add = () => {
 }
 
 const update = () => {
-  request.put('/book/books',data.form).then(res => {
-    if (res.data.code === '200') {
+  request.put<unknown, Result>('/book/books',data.form).then(res => {
+    if (res.code === '200') {
       console.log(res)
       data.dialogFormVisible = false;
       ElMessage.success('操作成功！')
       load()
     }else{
-      ElMessage.error(res.data.msg)
+      ElMessage.error(res.msg)
     }
   })
 }
@@ -198,18 +198,17 @@ const handleUpdate = (row) => {
 
 const handleDelete = (row) => {
   ElMessageBox.confirm('删除数据后无法恢复，确定删除吗？','删除确认',{type: 'warning'}).then(() => {
-    request.put('/book/books/'+row.id).then(res => {
-      if (res.data.code === '200') {
+    request.delete<unknown, Result>('/book/books/'+row.id).then(res => {
+      if (res.code === '200') {
         console.log(res)
         data.dialogFormVisible = false;
         ElMessage.success('操作成功！')
         load()
       }else{
-        ElMessage.error(res.data.msg)
+        ElMessage.error(res.msg)
       }
     })
   }).catch()
-
 }
 
 const handleSelectionChange = (row) => {
