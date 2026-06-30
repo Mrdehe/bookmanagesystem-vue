@@ -99,6 +99,13 @@ import { reactive } from "vue";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {Delete, Edit,} from '@element-plus/icons-vue'
 
+// 后端统一返回结构（响应拦截器已剥离外层 AxiosResponse，此处直接对应业务体）
+interface Result {
+  code: string
+  msg: string
+  data: any
+}
+
 const data = reactive({
   name: null,
   books:[],
@@ -159,7 +166,7 @@ const save = () => {
 }
 
 const add = () => {
-  request.post('/book/books',data.form).then(res => {
+  request.post<unknown, Result>('/book/books',data.form).then(res => {
     if (res.code === '200') {
       console.log(res)
       data.dialogFormVisible = false;
